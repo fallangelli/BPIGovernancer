@@ -20,11 +20,31 @@ public class JdbcUtils {
   public static String MERGE_CERT_TYPE = null;
   public static String MERGE_PARALLEL = null;
 
+  public static Integer EXTRACT_RESULT_TYPE = null;
   public static String EXTRACT_RESULT_TABLE_NAME = null;
   public static Integer EXTRACT_RESULT_TYPE_THRESHOLD = null;
   public static Integer EXTRACT_RESULT_BIT_THRESHOLD = null;
-  public static Integer EXTRACT_RESULT_DIS_THRESHOLD = null;
-  public static Integer EXTRACT_RESULT_JW_THRESHOLD = null;
+  public static Integer SIM_2_DIS_THRESHOLD = null;
+  public static Integer SIM_2_JW_THRESHOLD = null;
+  public static Integer SIM_3_1_2_DIS_THRESHOLD = null;
+  public static Integer SIM_3_1_3_DIS_THRESHOLD = null;
+  public static Integer SIM_3_2_3_DIS_THRESHOLD = null;
+  public static Integer SIM_3_1_2_JW_THRESHOLD = null;
+  public static Integer SIM_3_1_3_JW_THRESHOLD = null;
+  public static Integer SIM_3_2_3_JW_THRESHOLD = null;
+  public static Integer SIM_4_1_2_DIS_THRESHOLD = null;
+  public static Integer SIM_4_1_3_DIS_THRESHOLD = null;
+  public static Integer SIM_4_1_4_DIS_THRESHOLD = null;
+  public static Integer SIM_4_2_3_DIS_THRESHOLD = null;
+  public static Integer SIM_4_2_4_DIS_THRESHOLD = null;
+  public static Integer SIM_4_3_4_DIS_THRESHOLD = null;
+  public static Integer SIM_4_1_2_JW_THRESHOLD = null;
+  public static Integer SIM_4_1_3_JW_THRESHOLD = null;
+  public static Integer SIM_4_1_4_JW_THRESHOLD = null;
+  public static Integer SIM_4_2_3_JW_THRESHOLD = null;
+  public static Integer SIM_4_2_4_JW_THRESHOLD = null;
+  public static Integer SIM_4_3_4_JW_THRESHOLD = null;
+
 
   public static String CHECK_DIC_CODE_TABLE_NAME = null;
   public static char[] INVALID_CHARS = null;
@@ -55,16 +75,32 @@ public class JdbcUtils {
       MERGE_CERT_TYPE = prop.getProperty("merge_cert_type");
       MERGE_PARALLEL = prop.getProperty("merge_parallel");
 
+      EXTRACT_RESULT_TYPE = Integer.parseInt(prop.getProperty("extract_result_type"));
       //获取目标表名
       EXTRACT_RESULT_TABLE_NAME = prop.getProperty("extract_result_table_name");
       //获取阈值
       EXTRACT_RESULT_TYPE_THRESHOLD = Integer.parseInt(prop.getProperty("extract_result_type_threshold"));
-      //获取阈值
       EXTRACT_RESULT_BIT_THRESHOLD = Integer.parseInt(prop.getProperty("extract_result_bit_threshold"));
-      //获取阈值
-      EXTRACT_RESULT_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("extract_result_dis_threshold"));
-      //获取阈值
-      EXTRACT_RESULT_JW_THRESHOLD = Integer.parseInt(prop.getProperty("extract_result_jw_threshold"));
+      SIM_2_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_2_dis_threshold"));
+      SIM_2_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_2_jw_threshold"));
+      SIM_3_1_2_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_1_2_dis_threshold"));
+      SIM_3_1_3_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_1_3_dis_threshold"));
+      SIM_3_2_3_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_2_3_dis_threshold"));
+      SIM_3_1_2_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_1_2_jw_threshold"));
+      SIM_3_1_3_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_1_3_jw_threshold"));
+      SIM_3_2_3_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_3_2_3_jw_threshold"));
+      SIM_4_1_2_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_2_dis_threshold"));
+      SIM_4_1_3_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_3_dis_threshold"));
+      SIM_4_1_4_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_4_dis_threshold"));
+      SIM_4_2_3_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_2_3_dis_threshold"));
+      SIM_4_2_4_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_2_4_dis_threshold"));
+      SIM_4_3_4_DIS_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_3_4_dis_threshold"));
+      SIM_4_1_2_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_2_jw_threshold"));
+      SIM_4_1_3_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_3_jw_threshold"));
+      SIM_4_1_4_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_1_4_jw_threshold"));
+      SIM_4_2_3_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_2_3_jw_threshold"));
+      SIM_4_2_4_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_2_4_jw_threshold"));
+      SIM_4_3_4_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_3_4_jw_threshold"));
 
 
       //获取目标类型
@@ -72,6 +108,8 @@ public class JdbcUtils {
 
 
     } catch (Exception e) {
+      e.printStackTrace();
+      logger.severe(e.getMessage());
       throw new ExceptionInInitializerError(e);
     }
   }

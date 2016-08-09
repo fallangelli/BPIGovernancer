@@ -2,7 +2,6 @@ package service;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
 import processor.ExtractResultPorcessor;
 import utils.JdbcUtils;
 import utils.TransLogger;
@@ -18,22 +17,29 @@ public class ExtractResultService extends Service<Integer> {
     return new Task<Integer>() {
       @Override
       public Integer call() throws SQLException {
-        updateProgress(0, 1);
         logger.info("开始时间 : " + (new java.util.Date()).toString());
-        Boolean result = ExtractResultPorcessor.extractResults();
+        updateProgress(0, 3);
+        updateTitle("执行相似度提取中...");
+        Boolean result = false;
+        result = ExtractResultPorcessor.extractResults();
+        updateProgress(1, 3);
+        updateTitle("执行 同号两名 提取中...");
+        Boolean result1 = false;
+        result1 = ExtractResultPorcessor.extractSim2Table();
+        updateProgress(2, 3);
+        updateTitle("执行 同号三名 提取中...");
+        Boolean result2 = false;
+        result2 = ExtractResultPorcessor.extractSim3Table();
+        updateProgress(3, 3);
         String msg = "";
-        if (result) {
+        if (result && result1 && result2) {
           msg = "执行完成！结果请查看表 " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME + "_merge_valid 和 " +
             JdbcUtils.EXTRACT_RESULT_TABLE_NAME + "_merge_invalid";
         } else {
           msg = "提取结果出现错误！！";
         }
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("完成");
-        alert.setHeaderText("提取结果");
-        alert.setContentText(msg);
-        alert.showAndWait();
-        updateProgress(1, 1);
+        updateTitle(msg);
+
         return null;
       }
     };

@@ -196,8 +196,28 @@ public class Controller {
     try {
       vBoxItems.getChildren().clear();
       ExtractResultService service = new ExtractResultService();
+
+      final Label label = new Label();
+      label.setPrefWidth(600);
+      label.setWrapText(true);
+      label.textProperty().bind(service.titleProperty());
+
+      final ProgressBar pb = new ProgressBar();
+      pb.setPrefWidth(300);
+      pb.setProgress(0);
+
+      pb.progressProperty().bind(service.progressProperty());
+
+      final VBox vb = new VBox();
+      vb.setSpacing(15);
+      vb.setAlignment(Pos.CENTER_LEFT);
+      vb.getChildren().addAll(label, pb);
+
       bindButtonState(service);
       service.start();
+
+      vBoxItems.getChildren().addAll(vb);
+
     } catch (Exception e) {
       logger.severe(e.getMessage());
     }
