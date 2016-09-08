@@ -1,10 +1,15 @@
 package rules;
 
+import utils.TransLogger;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
+import java.util.logging.Logger;
 
 @XmlRootElement
 public class MergeName implements Comparable<MergeName> {
+  private static Logger logger = TransLogger.getLogger(MergeName.class);
+
   Integer pin;
   Integer personID;
   String financeCode;
@@ -29,44 +34,56 @@ public class MergeName implements Comparable<MergeName> {
 
   @Override
   public int compareTo(MergeName o) {
-    NAME_TYPE otherType = o.getType();
-    //类型相等 看时间
-    if (otherType.getLevel().compareTo(this.getType().getLevel()) == 0) {
-      Date otherTime = o.getTime();
-      if (this.getTime() == null && otherTime == null)
-        return 0;
-      else if (this.getTime() == null && otherTime != null)
-        return 1;
-      else if (this.getTime() != null && otherTime == null)
-        return -1;
-      else if (this.getTime() != null && otherTime != null)
-        return otherTime.compareTo(this.getTime());
-    }
-    return otherType.getLevel().compareTo(this.getType().getLevel());
-  }
-//
-//  public int compareTo(Object o) {
-//
-//    MergeName name = (MergeName) o;
-//
-//    NAME_TYPE otherType = name.getType();
+    try {
+      NAME_TYPE otherType = o.getType();
 
-  //类型相等 看时间
-//    if (this.getType().getLevel().compareTo(otherType.getLevel()) == 0) {
-//      Date otherTime = name.getGetTime();
-//      if (this.getGetTime() == null && otherTime == null)
-//        return 0;
-//      else if (this.getGetTime() == null && otherTime != null)
-//        return -1;
-//      else if (this.getGetTime() != null && otherTime == null)
-//        return 1;
-//      else if (this.getGetTime() != null && otherTime != null)
-//        return this.getGetTime().compareTo(otherTime);
-//
-//      return 0;
-//    } else
-//      return this.getType().getLevel().compareTo(otherType.getLevel());
-//  }
+      //类型相等 看时间
+      if (otherType.getLevel().compareTo(this.getType().getLevel()) == 0) {
+        Date otherTime = o.getTime();
+        if (this.getTime() == null && otherTime == null)
+          return 0;
+        else if (this.getTime() == null && otherTime != null)
+          return 1;
+        else if (this.getTime() != null && otherTime == null)
+          return -1;
+        else if (this.getTime() != null && otherTime != null)
+          return otherTime.compareTo(this.getTime());
+      }
+      return otherType.getLevel().compareTo(this.getType().getLevel());
+    } catch (Exception e) {
+      logger.severe("name type is null!" + o.getCertNo() + ":" + o.getName());
+      logger.severe(e.getMessage());
+      logger.severe(o.toString());
+      logger.severe(this.toString());
+      logger.severe(o.getType().toString());
+      logger.severe(this.getType().toString());
+    }
+    return 0;
+  }
+
+  public String toString() {
+    return "pin:" + pin + "|" +
+      "personID:" + personID + "|" +
+      "financeCode:" + financeCode + "|" +
+      "certType:" + certType + "|" +
+      "certNo:" + certNo + "|" +
+      "certNo_18:" + certNo_18 + "|" +
+      "time:" + time + "|" +
+      "name:" + name + "|" +
+      "pinyin:" + pinyin + "|" +
+      "type:" + type + "|" +
+      "H_Name:" + H_Name + "|" +
+      "HS_Name:" + HS_Name + "|" +
+      "HSB_Name:" + HSB_Name + "|" +
+      "HSBC_Name:" + HSBC_Name + "|" +
+      "HSBCO_Name:" + HSBCO_Name + "|" +
+      "H_Pinyin:" + H_Pinyin + "|" +
+      "HS_Pinyin:" + HS_Pinyin + "|" +
+      "HSB_Pinyin:" + HSB_Pinyin + "|" +
+      "HSBC_Pinyin:" + HSBC_Pinyin + "|" +
+      "HSBCO_Pinyin:" + HSBCO_Pinyin + "|" +
+      "similarity:" + similarity;
+  }
 
   public Integer getPin() {
     return pin;

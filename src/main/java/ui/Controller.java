@@ -73,7 +73,7 @@ public class Controller {
       prop.load(in);
       CHECK_CERTNO_PARTITION_COUNT = Integer.parseInt(prop.getProperty("check_certno_partition_count"));
       CHECK_CERTNO_THREAD_POOL_SIZE = Integer.parseInt(prop.getProperty("check_certno_threadpool_max_size"));
-      MERGE_THREAD_PARTITION_COUNT = Integer.parseInt(prop.getProperty("merge_partition_count"));
+      MERGE_THREAD_PARTITION_COUNT = 128;
       MERGE_THREAD_POOL_SIZE = Integer.parseInt(prop.getProperty("merge_threadpool_max_size"));
       CHECK_DIC_CODE_THREAD_PROCESS_COUNT = Integer.parseInt(prop.getProperty("check_dic_code_thread_process_count"));
       CHECK_DIC_CODE_THREAD_POOL_SIZE = Integer.parseInt(prop.getProperty("check_dic_code_threadpool_max_size"));

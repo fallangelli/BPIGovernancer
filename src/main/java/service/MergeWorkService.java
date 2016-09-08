@@ -46,7 +46,7 @@ public class MergeWorkService extends Service<Integer> {
     mergeName.setPin(result.getInt("PIN"));
     mergeName.setPersonID(result.getInt("PERSONID"));
     mergeName.setFinanceCode(result.getString("FINANCECODE"));
-    mergeName.setCertType(result.getString("CERTTYPE"));
+    mergeName.setCertType(result.getString("CERTTYPE").trim());
     mergeName.setCertNo(result.getString("CERTNO"));
     mergeName.setCertNo_18(result.getString("CERTNO_18"));
     mergeName.setTime(result.getDate("GETTIME"));
@@ -61,7 +61,7 @@ public class MergeWorkService extends Service<Integer> {
     pstmt.setInt(1, mergeName.getPin());
     pstmt.setInt(2, mergeName.getPersonID());
     pstmt.setString(3, mergeName.getFinanceCode());
-    pstmt.setString(4, mergeName.getCertType());
+    pstmt.setString(4, mergeName.getCertType().trim());
     pstmt.setString(5, mergeName.getCertNo());
     pstmt.setString(6, mergeName.getCertNo_18());
     pstmt.setDate(7, new java.sql.Date(mergeName.getTime().getTime()));
@@ -144,8 +144,8 @@ public class MergeWorkService extends Service<Integer> {
             + JdbcUtils.MERGE_TABLE_NAME + "_duplicate PARTITION ("
             + getPartName() + ")  t ";
 
-          if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
-            sql += " where certtype = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
+          if (JdbcUtils.MERGE_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+            sql += " where trim(certtype) = '" + JdbcUtils.MERGE_CERT_TYPE + "'";
           sql += " order by certno_18,certno";
 
           statement = conn.createStatement();

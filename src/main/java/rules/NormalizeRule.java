@@ -18,6 +18,7 @@ public class NormalizeRule {
     } else if (getNameForm(mergeName.getName()) == NAME_FORM.YW) {
       return mergeYWName(mergeName);
     } else {
+      mergeName.setType(MergeName.NAME_TYPE.OTHER);
       return mergeName;
     }
   }

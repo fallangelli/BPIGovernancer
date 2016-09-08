@@ -102,10 +102,8 @@ public class JdbcUtils {
       SIM_4_2_4_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_2_4_jw_threshold"));
       SIM_4_3_4_JW_THRESHOLD = Integer.parseInt(prop.getProperty("sim_4_3_4_jw_threshold"));
 
-
       //获取目标类型
       CHECK_DIC_CODE_TABLE_NAME = prop.getProperty("check_dic_code_table_name");
-
 
     } catch (Exception e) {
       e.printStackTrace();

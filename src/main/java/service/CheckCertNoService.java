@@ -61,7 +61,7 @@ public class CheckCertNoService extends Service<Integer> {
           sql = "SELECT /*+ parallel(t " + JdbcUtils.CHECK_CERTNO_PARALLEL + ") */ * FROM " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " PARTITION ("
             + getPartName() + ") t ";
           if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
-            sql += " where certtype = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
+            sql += " where trim(certtype) = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
 
           statement = conn.createStatement();
           result = statement.executeQuery(sql);
@@ -72,7 +72,7 @@ public class CheckCertNoService extends Service<Integer> {
             item.setPersonid(result.getInt("PERSONID"));
             item.setFINANCECODE(result.getString("FINANCECODE"));
             item.setName(result.getString("NAME"));
-            item.setCerttype(result.getString("CERTTYPE"));
+            item.setCerttype(result.getString("CERTTYPE").trim());
             item.setCertno(result.getString("CERTNO"));
             item.setGetTime(result.getDate("GETTIME"));
             itemList.add(item);
@@ -109,7 +109,7 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtInvalid.setInt(2, item.getPersonid());
                 pstmtInvalid.setString(3, item.getFINANCECODE());
                 pstmtInvalid.setString(4, item.getName());
-                pstmtInvalid.setString(5, item.getCerttype());
+                pstmtInvalid.setString(5, item.getCerttype().trim());
                 pstmtInvalid.setString(6, item.getCertno());
                 pstmtInvalid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
                 String msg = "";
@@ -147,7 +147,7 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtValid.setInt(2, item.getPersonid());
                 pstmtValid.setString(3, item.getFINANCECODE());
                 pstmtValid.setString(4, item.getName());
-                pstmtValid.setString(5, item.getCerttype());
+                pstmtValid.setString(5, item.getCerttype().trim());
                 pstmtValid.setString(6, item.getCertno());
                 pstmtValid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
                 //15位转18位
