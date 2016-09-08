@@ -239,11 +239,11 @@ public class MergeName implements Comparable<MergeName> {
   //使用八进制数标识相似度，依次从高位到低位
   //各位 基准为8，拼音不相等-1，字符不相等再-1
   public enum NAME_TYPE {
-    H(Long.valueOf("700000", 8)),// "只由汉字组成"
-    HS(Long.valueOf("070000", 8)),// "只由汉字/空格组成"
-    HSB(Long.valueOf("007000", 8)),// "只由汉字/空格/括号对组成"
-    HSBC(Long.valueOf("000700", 8)),// "只由汉字/空格/括号对/英文字母、数字组成"
-    HSBCO(Long.valueOf("000070", 8)),// "只由汉字/空格/英文字符/括号对/其他字符组成"
+    H(Long.valueOf("700000", 8)),// "只由汉字组成"|"只由英文组成"
+    HS(Long.valueOf("070000", 8)),// "只由汉字/空格组成"|"只由英文/空格组成"
+    HSB(Long.valueOf("007000", 8)),// "只由汉字/空格/括号对组成"|"只由英文/空格/括号对组成"
+    HSBC(Long.valueOf("000700", 8)),// "只由汉字/空格/括号对/英文字母、数字组成"|"只由英文/空格/括号对/数字组成"
+    HSBCO(Long.valueOf("000070", 8)),// "只由汉字/空格/英文字符/括号对/其他字符组成"|"只由英文/空格/数字/括号对/其他字符组成"
     OTHER(Long.valueOf("000007", 8));// "其他"
 
     private Long level;

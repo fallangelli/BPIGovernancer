@@ -1,5 +1,6 @@
 package rules;
 
+import com.alibaba.druid.util.StringUtils;
 import utils.JdbcUtils;
 import utils.TransLogger;
 
@@ -99,7 +100,6 @@ public class MergeRule {
     String baseOriName = base.getName();
     String baseOriPinyin = base.getPinyin();
 
-
     for (int i = 1; i < nameList.size(); i++) {
       MergeName name = nameList.get(i);
       MergeName.NAME_TYPE type = name.getType();
@@ -114,7 +114,8 @@ public class MergeRule {
       } else {
         String compName = getCompareName(name);
         String compPinyin = getComparePinyin(name);
-        if (compName == null || compPinyin == null || baseName == null || basePinyin == null) {
+        if (StringUtils.isEmpty(compName) || StringUtils.isEmpty(compPinyin) ||
+          StringUtils.isEmpty(baseName) || StringUtils.isEmpty(basePinyin)) {
           simiDelta = '1';
         } else {
 

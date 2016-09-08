@@ -5,6 +5,7 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import rules.*;
+import utils.EnumCertType;
 import utils.JdbcUtils;
 import utils.TransLogger;
 
@@ -17,17 +18,8 @@ import java.util.logging.Logger;
 
 public class MergeWorkService extends Service<Integer> {
   private static Logger logger = TransLogger.getLogger(MergeWorkService.class);
-  List<MergePerson> personList = new ArrayList<>();
   private StringProperty partName = new SimpleStringProperty();
   private FileWriter os;
-
-  public List<MergePerson> getPersonList() {
-    return personList;
-  }
-
-  public void setPersonList(List<MergePerson> personList) {
-    this.personList = personList;
-  }
 
   public final String getPartName() {
     return partName.get();
@@ -60,62 +52,10 @@ public class MergeWorkService extends Service<Integer> {
     mergeName.setTime(result.getDate("GETTIME"));
     mergeName.setName(result.getString("NAME"));
     mergeName.setPinyin(NormalizeRule.getPY(result.getString("NAME")));
-
-    MergeName.NAME_TYPE type = NormalizeRule.getNameType(mergeName.getName());
-    mergeName.setType(type);
-    String tmpName = mergeName.getName();
-    switch (type) {
-      case H:
-        mergeName.setH_Name(tmpName);
-        mergeName.setH_Pinyin(NormalizeRule.getPY(tmpName));
-        break;
-      case HS:
-        tmpName = NormalizeRule.removeS(tmpName);
-        mergeName.setHS_Name(tmpName);
-        mergeName.setHS_Pinyin(NormalizeRule.getPY(tmpName));
-        break;
-      case HSB:
-        tmpName = NormalizeRule.removeSB(tmpName);
-        mergeName.setHSB_Name(tmpName);
-        mergeName.setHSB_Pinyin(NormalizeRule.getPY(tmpName));
-        break;
-      case HSBC:
-        tmpName = NormalizeRule.removeSBC(tmpName);
-        mergeName.setHSBC_Name(tmpName);
-        mergeName.setHSBC_Pinyin(NormalizeRule.getPY(tmpName));
-        break;
-      case HSBCO:
-      case OTHER:
-      default:
-        tmpName = NormalizeRule.removeSBCO(tmpName);
-        mergeName.setHSBCO_Name(tmpName);
-        mergeName.setHSBCO_Pinyin(NormalizeRule.getPY(tmpName));
-        break;
-    }
     mergeName.setSimilarity((long) -1);
-    return mergeName;
+    return NormalizeRule.doNormalize(mergeName);
   }
 
-  private void addNameToWapperPerson(MergeName name) {
-    if (getPersonList().size() > 0 &&
-      name.getCertNo_18().compareToIgnoreCase(getPersonList().get(getPersonList().size() - 1).getCertNo()) == 0) {
-      getPersonList().get(getPersonList().size() - 1).getCertNames().add(name);
-    } else {
-      MergePerson newPersn = new MergePerson();
-      newPersn.setCertNo(name.getCertNo_18());
-      newPersn.setCertType(name.getCertType());
-      newPersn.setCertNames(new ArrayList<MergeName>());
-      newPersn.getCertNames().add(name);
-      getPersonList().add(newPersn);
-    }
-  }
-
-  private void sortNameTypes() {
-    for (int i = 0; i < getPersonList().size(); i++) {
-      MergePerson person = getPersonList().get(i);
-      Collections.sort(person.getCertNames());
-    }
-  }
 
   private void saveResultToDB(PreparedStatement pstmt, MergeName mergeName) throws SQLException {
     pstmt.setInt(1, mergeName.getPin());
@@ -181,6 +121,8 @@ public class MergeWorkService extends Service<Integer> {
       public Integer call() throws SQLException {
         logger.info("开始时间 : " + (new java.util.Date()).toString());
 
+        List<MergePerson> personList = new ArrayList<>();
+
         Integer recordCount = JdbcUtils.getPartitionRecordCount(JdbcUtils.MERGE_TABLE_NAME + "_duplicate",
           getPartName(), JdbcUtils.MERGE_CERT_TYPE);
         updateProgress(0, 3);
@@ -198,11 +140,14 @@ public class MergeWorkService extends Service<Integer> {
             return -1;
           }
 
-
           sql = "SELECT /*+ parallel(t " + JdbcUtils.MERGE_PARALLEL + ") */ * FROM "
             + JdbcUtils.MERGE_TABLE_NAME + "_duplicate PARTITION ("
-            + getPartName() + ")  t where certtype = '" + JdbcUtils.MERGE_CERT_TYPE + "'" +
-            " order by certno_18";
+            + getPartName() + ")  t ";
+
+          if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+            sql += " where certtype = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
+          sql += " order by certno_18,certno";
+
           statement = conn.createStatement();
 
           pstmt = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.MERGE_TABLE_NAME +
@@ -211,43 +156,72 @@ public class MergeWorkService extends Service<Integer> {
           result = statement.executeQuery(sql);
           conn.setAutoCommit(false);
 
-          int count = 0;
-          int total = recordCount * 3;
+          int progress = 0;
           while (result.next()) {
-            updateProgress(count++, recordCount);
-            MergeName name = getMergeNameFromDBResult(result);
-            MergeName merged = NormalizeRule.doNormalize(name);
-            addNameToWapperPerson(merged);
+            updateProgress(++progress, recordCount * 3);
+            MergeName merged = getMergeNameFromDBResult(result);
+            //身份证
+            if (merged.getCertType().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
+              merged.getCertType().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0) {
+              if (personList.size() > 0 &&
+                merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
+                personList.get(personList.size() - 1).getCertNames().add(merged);
+              } else {
+                MergePerson newPersn = new MergePerson();
+                newPersn.setCertNo(merged.getCertNo_18());
+                newPersn.setCertType(merged.getCertType());
+                newPersn.setCertNames(new ArrayList<MergeName>());
+                newPersn.getCertNames().add(merged);
+                personList.add(newPersn);
+              }
+            }
+            //其他类型
+            else {
+              if (personList.size() > 0 &&
+                merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
+                personList.get(personList.size() - 1).getCertNames().add(merged);
+              } else {
+                MergePerson newPersn = new MergePerson();
+                newPersn.setCertNo(merged.getCertNo());
+                newPersn.setCertType(merged.getCertType());
+                newPersn.setCertNames(new ArrayList<MergeName>());
+                newPersn.getCertNames().add(merged);
+                personList.add(newPersn);
+              }
+            }
           }
 
           JdbcUtils.releaseStatement(statement, result);
 
 
-          int size = getPersonList().size();
+          int size = personList.size();
           if (size <= 0) {
             return 1;
           }
 
           logger.fine("线程" + getPartName() + "开始排序");
-          sortNameTypes();
+          for (int i = 0; i < personList.size(); i++) {
+            MergePerson person = personList.get(i);
+            Collections.sort(person.getCertNames());
+          }
 
-          total = recordCount + size * 2;
+          int total = recordCount + size + size;
           for (int i = 0; i < size; i++) {
-            updateProgress(recordCount + i, total);
-            MergePerson mergePerson = getPersonList().get(i);
+            updateProgress(++progress, total);
+            MergePerson mergePerson = personList.get(i);
             MergeRule.doMerge(mergePerson);
           }
 
           logger.fine("线程" + getPartName() + "开始写回");
-          for (int i = 0; i < getPersonList().size(); i++) {
-            updateProgress(recordCount + size + i, total);
-            MergePerson mergePerson = getPersonList().get(i);
+          for (int i = 0; i < size; i++) {
+            updateProgress(++progress, total);
+            MergePerson mergePerson = personList.get(i);
             for (int j = 0; j < mergePerson.getCertNames().size(); j++) {
               saveResultToDB(pstmt, mergePerson.getCertNames().get(j));
             }
             // 分段提交
-            if ((i % 10000 == 0 && i != 0) || i == (getPersonList().size() - 1)) {
-              Thread.sleep(4000);
+            if ((i % 10000 == 0 && i != 0) || i == (personList.size() - 1)) {
+              Thread.sleep(1000);
               pstmt.executeBatch();
               conn.commit();
               conn.setAutoCommit(false);// 开始事务
@@ -275,7 +249,7 @@ public class MergeWorkService extends Service<Integer> {
           }
         }
         personList.clear();
-        return null;
+        return 1;
       }
     };
   }

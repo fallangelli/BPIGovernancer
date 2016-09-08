@@ -18,21 +18,21 @@ public class ExtractResultService extends Service<Integer> {
       @Override
       public Integer call() throws SQLException {
         logger.info("开始时间 : " + (new java.util.Date()).toString());
-        updateProgress(0, 3);
+        updateProgress(0, 4);
         updateTitle("执行相似度提取中...");
-        Boolean result = false;
-        result = ExtractResultPorcessor.extractResults();
-        updateProgress(1, 3);
+        Boolean result = ExtractResultPorcessor.extractResults();
+        updateProgress(1, 4);
         updateTitle("执行 同号两名 提取中...");
-        Boolean result1 = false;
-        result1 = ExtractResultPorcessor.extractSim2Table();
-        updateProgress(2, 3);
+        Boolean result1 = ExtractResultPorcessor.extractSim2Table();
+        updateProgress(2, 4);
         updateTitle("执行 同号三名 提取中...");
-        Boolean result2 = false;
-        result2 = ExtractResultPorcessor.extractSim3Table();
-        updateProgress(3, 3);
-        String msg = "";
-        if (result && result1 && result2) {
+        Boolean result2 = ExtractResultPorcessor.extractSim3Table();
+        updateProgress(3, 4);
+        updateTitle("执行 同号四名 提取中...");
+        Boolean result3 = ExtractResultPorcessor.extractSim4Table();
+        updateProgress(4, 4);
+        String msg;
+        if (result && result1 && result2 && result3) {
           msg = "执行完成！结果请查看表 " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME + "_merge_valid 和 " +
             JdbcUtils.EXTRACT_RESULT_TABLE_NAME + "_merge_invalid";
         } else {

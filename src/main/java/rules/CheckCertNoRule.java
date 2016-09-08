@@ -1,6 +1,7 @@
 package rules;
 
 import processor.CheckCertNoProcessor;
+import utils.ErrorStatus;
 import utils.TransLogger;
 
 import java.text.ParseException;
@@ -16,14 +17,14 @@ import java.util.regex.Pattern;
  * Created by Administrator on 2016/3/21.
  */
 public class CheckCertNoRule {
-  private final static int[] VERIFY_CODE_WEIGHT = {7, 9, 10, 5, 8, 4, 2, 1,
-    6, 3, 7, 9, 10, 5, 8, 4, 2};// 18位身份证中，各个数字的生成校验码时的权值
+  private final static int[] VERIFY_CODE_WEIGHT =
+    {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};// 18位身份证中，各个数字的生成校验码时的权值
   private final static Date MINIMAL_BIRTH_DATE = new Date(-2209017600000L); // 身份证的最小出生日期,1900年1月1日
   private final static int NEW_CARD_NUMBER_LENGTH = 18;
   private final static int OLD_CARD_NUMBER_LENGTH = 15;
   private final static CheckCertNoRule INSTANCE = new CheckCertNoRule();
   private static Logger logger = TransLogger.getLogger(CheckCertNoRule.class);
-  String[] ValCodeArr = {"1", "0", "x", "9", "8", "7", "6", "5", "4", "3", "2"};
+  char[] ValCodeArr = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
 
   //  Regex reg15 = new Regex(@"^[1-9]d{7}((0[1-9])|(1[0-2]))(([0[1-9]|1d|2d])|3[0-1])d{2}([0-9]|x|X){1}$");
 //  Regex reg18 = new Regex(@"^[1-9]\d{5}[1-9]\d{3}((0\[1-9]))|((1[0-2]))(([0\[1-9]|1\d|2\d])|3[0-1])\d{3}([0-9]|x|X){1}$");
@@ -57,29 +58,27 @@ public class CheckCertNoRule {
       throw new Exception("不合法的身份证号码");
     }
     char[] Ai = idCardNumber.toCharArray();
-    int[] Wi = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
-    char[] verifyCode = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
     int S = 0;
     int Y;
-    for (int i = 0; i < Wi.length; i++) {
-      S += (Ai[i] - '0') * Wi[i];
+    for (int i = 0; i < VERIFY_CODE_WEIGHT.length; i++) {
+      S += (Ai[i] - '0') * VERIFY_CODE_WEIGHT[i];
     }
     Y = S % 11;
-    return verifyCode[Y];
+    return ValCodeArr[Y];
   }
 
-  public List<errorStatus> isValidID(String id) {
-    List<errorStatus> retStatuses = new ArrayList<>();
+  public List<ErrorStatus> isValidID(String id) {
+    List<ErrorStatus> retStatuses = new ArrayList<>();
     if (!checkSize(id))
-      retStatuses.add(errorStatus.LENG_ERR);
+      retStatuses.add(ErrorStatus.LENG_ERR);
     if (!checkCharacter(id))
-      retStatuses.add(errorStatus.CHAR_ERR);
+      retStatuses.add(ErrorStatus.CHAR_ERR);
     if (!checkBirthday(id))
-      retStatuses.add(errorStatus.BIRTH_ERR);
+      retStatuses.add(ErrorStatus.BIRTH_ERR);
     if (!checkCheckCode(id))
-      retStatuses.add(errorStatus.CHE_ERR);
+      retStatuses.add(ErrorStatus.CHE_ERR);
     if (!checkRegion(id))
-      retStatuses.add(errorStatus.REG_ERR);
+      retStatuses.add(ErrorStatus.REG_ERR);
 
     return retStatuses;
   }
@@ -154,8 +153,8 @@ public class CheckCertNoRule {
           TotalmulAiWi += (int) (pszSrc[i] - '0') * VERIFY_CODE_WEIGHT[i];
         }
         int modValue = TotalmulAiWi % 11;
-        String strVerifyCode = ValCodeArr[modValue];
-        Ai = Ai + strVerifyCode;
+        char verifyCode = ValCodeArr[modValue];
+        Ai = Ai + verifyCode;
 
         if (Ai.compareToIgnoreCase(id) == 0)
           return true;
@@ -179,7 +178,6 @@ public class CheckCertNoRule {
       } else
         return false;
     } catch (Exception e) {
-      logger.warning("提取行政区划代码异常:" + id);
       return false;
     }
   }
@@ -192,22 +190,5 @@ public class CheckCertNoRule {
       return false;
   }
 
-  public static enum errorStatus {
-    LENG_ERR("长度无效"),
-    CHAR_ERR("包含非法字符"),
-    BIRTH_ERR("出生日期格式错误"),
-    REG_ERR("无效行政区划"),
-    CHE_ERR("验证码错误");
-
-    private String msg;
-
-    private errorStatus(String msg) {
-      this.msg = msg;
-    }
-
-    public String getMsg() {
-      return msg;
-    }
-  }
 
 }

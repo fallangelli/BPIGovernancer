@@ -6,6 +6,9 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import rules.CheckCertNoRule;
 import rules.CheckNoItem;
+import rules.CheckOtherNoRule;
+import utils.EnumCertType;
+import utils.ErrorStatus;
 import utils.JdbcUtils;
 import utils.TransLogger;
 
@@ -18,7 +21,6 @@ public class CheckCertNoService extends Service<Integer> {
   private static Logger logger = TransLogger.getLogger(CheckCertNoService.class);
 
   private StringProperty partName = new SimpleStringProperty();
-  private List<CheckNoItem> itemList = new ArrayList<>();
 
   public final String getPartName() {
     return partName.get();
@@ -32,23 +34,14 @@ public class CheckCertNoService extends Service<Integer> {
     return partName;
   }
 
-  private void addDBResultToList(ResultSet result) throws SQLException {
-    CheckNoItem item = new CheckNoItem();
-    item.setPin(result.getInt("PIN"));
-    item.setPersonid(result.getInt("PERSONID"));
-    item.setFINANCECODE(result.getString("FINANCECODE"));
-    item.setName(result.getString("NAME"));
-    item.setCerttype(result.getString("CERTTYPE"));
-    item.setCertno(result.getString("CERTNO"));
-    item.setGetTime(result.getDate("GETTIME"));
-    itemList.add(item);
-  }
-
   protected Task<Integer> createTask() {
     return new Task<Integer>() {
       @Override
       public Integer call() throws SQLException {
         logger.info("开始时间 : " + (new java.util.Date()).toString());
+
+        List<CheckNoItem> itemList = new ArrayList<>();
+
         int currPro = 0;
         Integer recordCount = JdbcUtils.getPartitionRecordCount(JdbcUtils.CHECK_CERTNO_TABLE_NAME,
           getPartName(), JdbcUtils.CHECK_CERTNO_CERT_TYPE);
@@ -66,9 +59,25 @@ public class CheckCertNoService extends Service<Integer> {
           conn = JdbcUtils.getOracleConnection();
 
           sql = "SELECT /*+ parallel(t " + JdbcUtils.CHECK_CERTNO_PARALLEL + ") */ * FROM " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " PARTITION ("
-            + getPartName() + ") t where certtype = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
+            + getPartName() + ") t ";
+          if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+            sql += " where certtype = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
+
           statement = conn.createStatement();
           result = statement.executeQuery(sql);
+          while (result.next()) {
+            updateProgress(++currPro, recordCount * 2);
+            CheckNoItem item = new CheckNoItem();
+            item.setPin(result.getInt("PIN"));
+            item.setPersonid(result.getInt("PERSONID"));
+            item.setFINANCECODE(result.getString("FINANCECODE"));
+            item.setName(result.getString("NAME"));
+            item.setCerttype(result.getString("CERTTYPE"));
+            item.setCertno(result.getString("CERTNO"));
+            item.setGetTime(result.getDate("GETTIME"));
+            itemList.add(item);
+          }
+          JdbcUtils.releaseStatement(statement, result);
 
           pstmtRemoveInvalid = conn.prepareStatement("delete from " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " where pin=?");
           pstmtValid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
@@ -76,11 +85,7 @@ public class CheckCertNoService extends Service<Integer> {
           pstmtInvalid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
             "_invalid values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
           conn.setAutoCommit(false);
-          while (result.next()) {
-            updateProgress(++currPro, recordCount * 2);
-            addDBResultToList(result);
-          }
-          JdbcUtils.releaseStatement(statement, result);
+
 
           for (int i = 0; i < itemList.size(); i++) {
             try {
@@ -88,7 +93,13 @@ public class CheckCertNoService extends Service<Integer> {
               CheckNoItem item = itemList.get(i);
               String id = item.getCertno();
 
-              List<CheckCertNoRule.errorStatus> retStatuses = CheckCertNoRule.getInstance().isValidID(id);
+              List<ErrorStatus> retStatuses;
+              if (item.getCerttype().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
+                item.getCerttype().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0)
+                retStatuses = CheckCertNoRule.getInstance().isValidID(id);
+              else
+                retStatuses = CheckOtherNoRule.getInstance().isValidID(id);
+
               if (retStatuses.size() != 0) {
                 if (JdbcUtils.CHECK_CERTNO_TABLE_NAME.contains("_invalid")) {
                   //源为错误表，仍错则跳出
@@ -109,15 +120,15 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtInvalid.setBoolean(12, false);
 
                 for (int j = 0; j < retStatuses.size(); j++) {
-                  if (retStatuses.get(j) == CheckCertNoRule.errorStatus.LENG_ERR)
+                  if (retStatuses.get(j) == ErrorStatus.LENG_ERR)
                     pstmtInvalid.setBoolean(8, true);
-                  if (retStatuses.get(j) == CheckCertNoRule.errorStatus.CHAR_ERR)
+                  if (retStatuses.get(j) == ErrorStatus.CHAR_ERR)
                     pstmtInvalid.setBoolean(9, true);
-                  if (retStatuses.get(j) == CheckCertNoRule.errorStatus.BIRTH_ERR)
+                  if (retStatuses.get(j) == ErrorStatus.BIRTH_ERR)
                     pstmtInvalid.setBoolean(10, true);
-                  if (retStatuses.get(j) == CheckCertNoRule.errorStatus.REG_ERR)
+                  if (retStatuses.get(j) == ErrorStatus.REG_ERR)
                     pstmtInvalid.setBoolean(11, true);
-                  if (retStatuses.get(j) == CheckCertNoRule.errorStatus.CHE_ERR)
+                  if (retStatuses.get(j) == ErrorStatus.CHE_ERR)
                     pstmtInvalid.setBoolean(12, true);
 
                   msg += retStatuses.get(j).getMsg() + ";";
@@ -140,7 +151,12 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtValid.setString(6, item.getCertno());
                 pstmtValid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
                 //15位转18位
-                pstmtValid.setString(8, CheckCertNoRule.getInstance().covertTo18(id).toUpperCase());
+                if (item.getCerttype().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
+                  item.getCerttype().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0)
+                  pstmtValid.setString(8, CheckCertNoRule.getInstance().covertTo18(id).toUpperCase());
+                else
+                  pstmtValid.setString(8, item.getCertno());
+
                 pstmtValid.addBatch();
               }
             } catch (SQLIntegrityConstraintViolationException cve) {
@@ -194,7 +210,7 @@ public class CheckCertNoService extends Service<Integer> {
             logger.warning(e.getMessage());
           }
         }
-
+        itemList.clear();
         return 1;
       }
 
