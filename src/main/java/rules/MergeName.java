@@ -37,19 +37,32 @@ public class MergeName implements Comparable<MergeName> {
     try {
       NAME_TYPE otherType = o.getType();
 
-      //类型相等 看时间
-      if (otherType.getLevel().compareTo(this.getType().getLevel()) == 0) {
-        Date otherTime = o.getTime();
-        if (this.getTime() == null && otherTime == null)
-          return 0;
-        else if (this.getTime() == null && otherTime != null)
-          return 1;
-        else if (this.getTime() != null && otherTime == null)
-          return -1;
-        else if (this.getTime() != null && otherTime != null)
-          return otherTime.compareTo(this.getTime());
+      if (NormalizeRule.getNameForm(this.getName()) == NormalizeRule.getNameForm(o.getName())) {
+        if (otherType.getLevel().compareTo(this.getType().getLevel()) == 0) {
+          //种类也相等，看时间
+          Date otherTime = o.getTime();
+          if (this.getTime() == null && otherTime == null)
+            return 0;
+          else if (this.getTime() == null && otherTime != null)
+            return 1;
+          else if (this.getTime() != null && otherTime == null)
+            return -1;
+          else if (this.getTime() != null && otherTime != null)
+            return otherTime.compareTo(this.getTime());
+        }
+
+        return otherType.getLevel().compareTo(this.getType().getLevel());
+      } else if (NormalizeRule.getNameForm(o.getName()) == NormalizeRule.NAME_FORM.HZ &&
+        NormalizeRule.getNameForm(this.getName()) == NormalizeRule.NAME_FORM.YW) {
+        return 1;
+      } else if (NormalizeRule.getNameForm(o.getName()) == NormalizeRule.NAME_FORM.YW &&
+        NormalizeRule.getNameForm(this.getName()) == NormalizeRule.NAME_FORM.HZ) {
+        return -1;
+      } else if (NormalizeRule.getNameForm(o.getName()) == NormalizeRule.NAME_FORM.OTHER) {
+        return -1;
+      } else if (NormalizeRule.getNameForm(this.getName()) == NormalizeRule.NAME_FORM.OTHER) {
+        return 1;
       }
-      return otherType.getLevel().compareTo(this.getType().getLevel());
     } catch (Exception e) {
       logger.severe("name type is null!" + o.getCertNo() + ":" + o.getName());
       logger.severe(e.getMessage());

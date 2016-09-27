@@ -181,14 +181,14 @@ public class NormalizeRule {
         mergeName.setHSB_Pinyin(NormalizeRule.getPY(tmpName + "," + tmpName1));
         break;
       case HSBC:
-        tmpName = NormalizeRule.removeSBC(tmpName);
+        tmpName = NormalizeRule.removeSBN(tmpName);
         mergeName.setHSBC_Name(tmpName);
         mergeName.setHSBC_Pinyin(NormalizeRule.getPY(tmpName));
         break;
       case HSBCO:
       case OTHER:
       default:
-        tmpName = NormalizeRule.removeSBCO(tmpName);
+        tmpName = NormalizeRule.removeSBNO(tmpName);
         mergeName.setHSBCO_Name(tmpName);
         mergeName.setHSBCO_Pinyin(NormalizeRule.getPY(tmpName));
         break;
@@ -257,6 +257,20 @@ public class NormalizeRule {
     String tmpTar1 = removeSBC(oriName);
 
     String regex = "([\u4e00-\u9fa5]+)";
+    String retVal = "";
+    Matcher matcher1 = Pattern.compile(regex).matcher(tmpTar1);
+    while (matcher1.find()) {
+      retVal += matcher1.group(0);
+    }
+
+    return retVal;
+  }
+
+  //去空格/括号对及其中的内容/英文字母/其他特殊字符
+  public static String removeSBNO(String oriName) {
+    String tmpTar1 = removeSBN(oriName);
+
+    String regex = "([a-zA-Z]+)";
     String retVal = "";
     Matcher matcher1 = Pattern.compile(regex).matcher(tmpTar1);
     while (matcher1.find()) {
