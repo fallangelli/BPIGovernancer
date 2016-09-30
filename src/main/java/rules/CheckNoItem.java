@@ -1,5 +1,7 @@
 package rules;
 
+import utils.EnumCertType;
+
 import java.util.Date;
 
 /**
@@ -7,11 +9,12 @@ import java.util.Date;
  */
 public class CheckNoItem {
   Integer pin;
-  Integer personid;
-  String FINANCECODE;
+  Integer personId;
+  String financeCode;
   String name;
-  String certtype;
-  String certno;
+  EnumCertType certType;
+  EnumCertType realCertType;
+  String certNo;
   Date getTime;
 
   public Integer getPin() {
@@ -22,20 +25,20 @@ public class CheckNoItem {
     this.pin = pin;
   }
 
-  public Integer getPersonid() {
-    return personid;
+  public Integer getPersonId() {
+    return personId;
   }
 
-  public void setPersonid(Integer personid) {
-    this.personid = personid;
+  public void setPersonId(Integer personId) {
+    this.personId = personId;
   }
 
-  public String getFINANCECODE() {
-    return FINANCECODE;
+  public String getFinanceCode() {
+    return financeCode;
   }
 
-  public void setFINANCECODE(String FINANCECODE) {
-    this.FINANCECODE = FINANCECODE;
+  public void setFinanceCode(String financeCode) {
+    this.financeCode = financeCode;
   }
 
   public String getName() {
@@ -46,20 +49,28 @@ public class CheckNoItem {
     this.name = name;
   }
 
-  public String getCerttype() {
-    return certtype;
+  public EnumCertType getCertType() {
+    return certType;
   }
 
-  public void setCerttype(String certtype) {
-    this.certtype = certtype;
+  public void setCertType(EnumCertType certType) {
+    this.certType = certType;
   }
 
-  public String getCertno() {
-    return certno;
+  public EnumCertType getRealCertType() {
+    return realCertType;
   }
 
-  public void setCertno(String certno) {
-    this.certno = certno;
+  public void setRealCertType(EnumCertType realCertType) {
+    this.realCertType = realCertType;
+  }
+
+  public String getCertNo() {
+    return certNo;
+  }
+
+  public void setCertNo(String certNo) {
+    this.certNo = certNo;
   }
 
   public Date getGetTime() {

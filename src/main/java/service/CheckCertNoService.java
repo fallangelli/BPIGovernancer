@@ -58,9 +58,10 @@ public class CheckCertNoService extends Service<Integer> {
         try {
           conn = JdbcUtils.getOracleConnection();
 
-          sql = "SELECT /*+ parallel(t " + JdbcUtils.CHECK_CERTNO_PARALLEL + ") */ * FROM " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " PARTITION ("
+          sql = "SELECT /*+ parallel(t " + JdbcUtils.CHECK_CERTNO_PARALLEL + ") */ * FROM "
+            + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " PARTITION ("
             + getPartName() + ") t ";
-          if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+          if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getCode()) != 0)
             sql += " where trim(certtype) = '" + JdbcUtils.CHECK_CERTNO_CERT_TYPE + "'";
 
           statement = conn.createStatement();
@@ -69,21 +70,30 @@ public class CheckCertNoService extends Service<Integer> {
             updateProgress(++currPro, recordCount * 2);
             CheckNoItem item = new CheckNoItem();
             item.setPin(result.getInt("PIN"));
-            item.setPersonid(result.getInt("PERSONID"));
-            item.setFINANCECODE(result.getString("FINANCECODE"));
+            item.setPersonId(result.getInt("PERSONID"));
+            item.setFinanceCode(result.getString("FINANCECODE"));
             item.setName(result.getString("NAME"));
-            item.setCerttype(result.getString("CERTTYPE").trim());
-            item.setCertno(result.getString("CERTNO"));
+            item.setCertType(EnumCertType.getEnumCertType(result.getString("CERTTYPE")));
+            item.setCertNo(result.getString("CERTNO"));
             item.setGetTime(result.getDate("GETTIME"));
+            item.setRealCertType(item.getCertType());
+            //类型不是身份证
+            if (item.getCertType() != EnumCertType.SFZ &&
+              item.getCertType() != EnumCertType.LSSFZ) {
+              //真实类型是身份证的
+              if (CheckCertNoRule.getInstance().isValidID(item.getCertNo()).size() == 0)
+                item.setRealCertType(EnumCertType.SFZ);
+            }
+
             itemList.add(item);
           }
           JdbcUtils.releaseStatement(statement, result);
 
           pstmtRemoveInvalid = conn.prepareStatement("delete from " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " where pin=?");
           pstmtValid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
-            "_valid values (?,?,?,?,?,?,?,?)");
+            "_valid values (?,?,?,?,?,?,?,?,?)");
           pstmtInvalid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
-            "_invalid values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            "_invalid values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
           conn.setAutoCommit(false);
 
 
@@ -91,14 +101,13 @@ public class CheckCertNoService extends Service<Integer> {
             try {
               updateProgress(++currPro, recordCount * 2);
               CheckNoItem item = itemList.get(i);
-              String id = item.getCertno();
 
               List<ErrorStatus> retStatuses;
-              if (item.getCerttype().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
-                item.getCerttype().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0)
-                retStatuses = CheckCertNoRule.getInstance().isValidID(id);
+              if (item.getRealCertType() == EnumCertType.SFZ ||
+                item.getRealCertType() == EnumCertType.LSSFZ)
+                retStatuses = CheckCertNoRule.getInstance().isValidID(item.getCertNo());
               else
-                retStatuses = CheckOtherNoRule.getInstance().isValidID(id);
+                retStatuses = CheckOtherNoRule.getInstance().isValidID(item);
 
               if (retStatuses.size() != 0) {
                 if (JdbcUtils.CHECK_CERTNO_TABLE_NAME.contains("_invalid")) {
@@ -106,11 +115,11 @@ public class CheckCertNoService extends Service<Integer> {
                   continue;
                 }
                 pstmtInvalid.setInt(1, item.getPin());
-                pstmtInvalid.setInt(2, item.getPersonid());
-                pstmtInvalid.setString(3, item.getFINANCECODE());
+                pstmtInvalid.setInt(2, item.getPersonId());
+                pstmtInvalid.setString(3, item.getFinanceCode());
                 pstmtInvalid.setString(4, item.getName());
-                pstmtInvalid.setString(5, item.getCerttype().trim());
-                pstmtInvalid.setString(6, item.getCertno());
+                pstmtInvalid.setString(5, item.getCertType().getCode());
+                pstmtInvalid.setString(6, item.getCertNo());
                 pstmtInvalid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
                 String msg = "";
                 pstmtInvalid.setBoolean(8, false);
@@ -118,6 +127,8 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtInvalid.setBoolean(10, false);
                 pstmtInvalid.setBoolean(11, false);
                 pstmtInvalid.setBoolean(12, false);
+                pstmtInvalid.setBoolean(13, false);
+                pstmtInvalid.setBoolean(14, false);
 
                 for (int j = 0; j < retStatuses.size(); j++) {
                   if (retStatuses.get(j) == ErrorStatus.LENG_ERR)
@@ -130,10 +141,14 @@ public class CheckCertNoService extends Service<Integer> {
                     pstmtInvalid.setBoolean(11, true);
                   if (retStatuses.get(j) == ErrorStatus.CHE_ERR)
                     pstmtInvalid.setBoolean(12, true);
+                  if (retStatuses.get(j) == ErrorStatus.NO_NUM_ERR)
+                    pstmtInvalid.setBoolean(13, true);
+                  if (retStatuses.get(j) == ErrorStatus.ALL_SAME_ERR)
+                    pstmtInvalid.setBoolean(14, true);
 
                   msg += retStatuses.get(j).getMsg() + ";";
                 }
-                pstmtInvalid.setString(13, msg);
+                pstmtInvalid.setString(15, msg);
                 pstmtInvalid.addBatch();
 
               } else {
@@ -144,18 +159,19 @@ public class CheckCertNoService extends Service<Integer> {
                 }
 
                 pstmtValid.setInt(1, item.getPin());
-                pstmtValid.setInt(2, item.getPersonid());
-                pstmtValid.setString(3, item.getFINANCECODE());
+                pstmtValid.setInt(2, item.getPersonId());
+                pstmtValid.setString(3, item.getFinanceCode());
                 pstmtValid.setString(4, item.getName());
-                pstmtValid.setString(5, item.getCerttype().trim());
-                pstmtValid.setString(6, item.getCertno());
+                pstmtValid.setString(5, item.getCertType().getCode());
+                pstmtValid.setString(6, item.getCertNo());
                 pstmtValid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
+                pstmtValid.setString(8, item.getRealCertType().getCode());
                 //15位转18位
-                if (item.getCerttype().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
-                  item.getCerttype().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0)
-                  pstmtValid.setString(8, CheckCertNoRule.getInstance().covertTo18(id).toUpperCase());
+                if (item.getRealCertType() == EnumCertType.SFZ ||
+                  item.getRealCertType() == EnumCertType.LSSFZ)
+                  pstmtValid.setString(9, CheckCertNoRule.getInstance().covertTo18(item.getCertNo()).toUpperCase());
                 else
-                  pstmtValid.setString(8, item.getCertno());
+                  pstmtValid.setString(9, item.getCertNo());
 
                 pstmtValid.addBatch();
               }

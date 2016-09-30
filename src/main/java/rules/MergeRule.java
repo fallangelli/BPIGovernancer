@@ -67,26 +67,26 @@ public class MergeRule {
     String retPinyin;
     switch (type) {
       case H:
-        retPinyin = toMerge.getH_Pinyin();
+        retPinyin = toMerge.getH_Pinyin().toLowerCase();
         break;
       case HS:
-        retPinyin = toMerge.getHS_Pinyin();
+        retPinyin = toMerge.getHS_Pinyin().toLowerCase();
         break;
       case HSB:
-        retPinyin = toMerge.getHSB_Pinyin();
+        retPinyin = toMerge.getHSB_Pinyin().toLowerCase();
         break;
       case HSBC:
-        retPinyin = toMerge.getHSBC_Pinyin();
+        retPinyin = toMerge.getHSBC_Pinyin().toLowerCase();
         break;
       case HSBCO:
-        retPinyin = toMerge.getHSBCO_Pinyin();
+        retPinyin = toMerge.getHSBCO_Pinyin().toLowerCase();
         break;
       case OTHER:
       default:
-        retPinyin = toMerge.getHSBCO_Pinyin();
+        retPinyin = toMerge.getHSBCO_Pinyin().toLowerCase();
         break;
     }
-    return retPinyin;
+    return retPinyin.toLowerCase();
   }
 
   public static void doMerge(MergePerson mergePerson) {

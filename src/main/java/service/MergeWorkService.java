@@ -144,7 +144,7 @@ public class MergeWorkService extends Service<Integer> {
             + JdbcUtils.MERGE_TABLE_NAME + "_duplicate PARTITION ("
             + getPartName() + ")  t ";
 
-          if (JdbcUtils.MERGE_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+          if (JdbcUtils.MERGE_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getCode()) != 0)
             sql += " where trim(certtype) = '" + JdbcUtils.MERGE_CERT_TYPE + "'";
           sql += " order by certno_18,certno";
 
@@ -161,8 +161,8 @@ public class MergeWorkService extends Service<Integer> {
             updateProgress(++progress, recordCount * 3);
             MergeName merged = getMergeNameFromDBResult(result);
             //身份证
-            if (merged.getCertType().compareToIgnoreCase(EnumCertType.SFZ.getValue()) == 0 ||
-              merged.getCertType().compareToIgnoreCase(EnumCertType.LSSFZ.getValue()) == 0) {
+            if (merged.getCertType().compareToIgnoreCase(EnumCertType.SFZ.getCode()) == 0 ||
+              merged.getCertType().compareToIgnoreCase(EnumCertType.LSSFZ.getCode()) == 0) {
               if (personList.size() > 0 &&
                 merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
                 personList.get(personList.size() - 1).getCertNames().add(merged);

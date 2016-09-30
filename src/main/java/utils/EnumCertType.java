@@ -6,31 +6,71 @@ package utils;
 
 public enum EnumCertType {
 
-  ALL("ALL"),
-  SFZ("0"),
-  HKB("1"),
-  HZ("2"),
-  JUNGZ("3"),
-  SBZ("4"),
-  GAJMTXZ("5"),
-  TWTBTXZ("6"),
-  LSSFZ("7"),
-  WGRJLZ("8"),
-  JINGGZ("9"),
-  XGSFZ("A"),
-  AMSFZ("B"),
-  TWSFZ("C"),
-  QT("X");
+  ALL("ALL", 99),
+  SFZ("0", 99),
+  HKB("1", 99),
+  HZ("2", 4),
+  JUNGZ("3", 3),
+  SBZ("4", 3),
+  GAJMTXZ("5", 4),
+  TWTBTXZ("6", 4),
+  LSSFZ("7", 99),
+  WGRJLZ("8", 4),
+  JINGGZ("9", 3),
+  XGSFZ("A", 4),
+  AMSFZ("B", 4),
+  TWSFZ("C", 4),
+  QT("X", 3);
 
-  private String value;
+  private String code;
 
-  private EnumCertType(String value) {
-    this.value = value;
+  private Integer minLength;
+
+  EnumCertType(String code, Integer minLenth) {
+    this.code = code;
+    this.minLength = minLenth;
   }
 
-  public String getValue() {
+  public static EnumCertType getEnumCertType(String type) {
+    if (type.compareToIgnoreCase(EnumCertType.SFZ.getCode()) == 0)
+      return EnumCertType.SFZ;
+    if (type.compareToIgnoreCase(EnumCertType.HKB.getCode()) == 0)
+      return EnumCertType.HKB;
+    if (type.compareToIgnoreCase(EnumCertType.HZ.getCode()) == 0)
+      return EnumCertType.HZ;
+    if (type.compareToIgnoreCase(EnumCertType.JUNGZ.getCode()) == 0)
+      return EnumCertType.JUNGZ;
+    if (type.compareToIgnoreCase(EnumCertType.SBZ.getCode()) == 0)
+      return EnumCertType.SBZ;
+    if (type.compareToIgnoreCase(EnumCertType.GAJMTXZ.getCode()) == 0)
+      return EnumCertType.GAJMTXZ;
+    if (type.compareToIgnoreCase(EnumCertType.TWTBTXZ.getCode()) == 0)
+      return EnumCertType.TWTBTXZ;
+    if (type.compareToIgnoreCase(EnumCertType.LSSFZ.getCode()) == 0)
+      return EnumCertType.LSSFZ;
+    if (type.compareToIgnoreCase(EnumCertType.WGRJLZ.getCode()) == 0)
+      return EnumCertType.WGRJLZ;
+    if (type.compareToIgnoreCase(EnumCertType.JINGGZ.getCode()) == 0)
+      return EnumCertType.JINGGZ;
+    if (type.compareToIgnoreCase(EnumCertType.XGSFZ.getCode()) == 0)
+      return EnumCertType.XGSFZ;
+    if (type.compareToIgnoreCase(EnumCertType.AMSFZ.getCode()) == 0)
+      return EnumCertType.AMSFZ;
+    if (type.compareToIgnoreCase(EnumCertType.TWSFZ.getCode()) == 0)
+      return EnumCertType.TWSFZ;
+    else
+      return EnumCertType.QT;
+  }
 
-    return this.value;
+  public String getCode() {
+
+    return this.code;
+
+  }
+
+  public Integer getMinLenth() {
+
+    return this.minLength;
 
   }
 

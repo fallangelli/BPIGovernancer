@@ -137,7 +137,7 @@ public class JdbcUtils {
 
       sql = "SELECT /*+ parallel(t " + COUNT_PARALLEL + ") */ count(*) FROM " +
         tableName + " PARTITION (" + partName + ") t ";
-      if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getValue()) != 0)
+      if (JdbcUtils.CHECK_CERTNO_CERT_TYPE.compareToIgnoreCase(EnumCertType.ALL.getCode()) != 0)
         sql += " where certtype = '" + type + "'";
 
       statement = conn.createStatement();

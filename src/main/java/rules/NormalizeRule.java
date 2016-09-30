@@ -239,7 +239,16 @@ public class NormalizeRule {
     String retVal = removeSB(oriName);
 
     retVal = retVal.replaceAll("[0-9a-zA-Z]", "");
-
+    retVal = retVal.replaceAll("[０]", "");
+    retVal = retVal.replaceAll("[１]", "");
+    retVal = retVal.replaceAll("[２]", "");
+    retVal = retVal.replaceAll("[３]", "");
+    retVal = retVal.replaceAll("[４]", "");
+    retVal = retVal.replaceAll("[５]", "");
+    retVal = retVal.replaceAll("[６]", "");
+    retVal = retVal.replaceAll("[７]", "");
+    retVal = retVal.replaceAll("[８]", "");
+    retVal = retVal.replaceAll("[９]", "");
     return retVal;
   }
 
@@ -248,7 +257,16 @@ public class NormalizeRule {
     String retVal = removeSB(oriName);
 
     retVal = retVal.replaceAll("[0-9]", "");
-
+    retVal = retVal.replaceAll("[０]", "");
+    retVal = retVal.replaceAll("[１]", "");
+    retVal = retVal.replaceAll("[２]", "");
+    retVal = retVal.replaceAll("[３]", "");
+    retVal = retVal.replaceAll("[４]", "");
+    retVal = retVal.replaceAll("[５]", "");
+    retVal = retVal.replaceAll("[６]", "");
+    retVal = retVal.replaceAll("[７]", "");
+    retVal = retVal.replaceAll("[８]", "");
+    retVal = retVal.replaceAll("[９]", "");
     return retVal;
   }
 
