@@ -19,6 +19,7 @@ public class NormalizeRule {
       return mergeYWName(mergeName);
     } else {
       mergeName.setType(MergeName.NAME_TYPE.OTHER);
+
       return mergeName;
     }
   }
@@ -301,7 +302,10 @@ public class NormalizeRule {
   public static NAME_FORM getNameForm(String name) {
     Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
     Matcher m = p.matcher(name);
-    if (m.find()) {
+    if (m.find() || name.contains("０") || name.contains("１") || name.contains("２") ||
+      name.contains("３") || name.contains("４") || name.contains("５") ||
+      name.contains("６") || name.contains("７") || name.contains("８") ||
+      name.contains("９")) {
       return NAME_FORM.HZ;
     } else {
       p = Pattern.compile("[a-zA-Z]");

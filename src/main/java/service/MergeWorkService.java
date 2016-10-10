@@ -47,12 +47,14 @@ public class MergeWorkService extends Service<Integer> {
     mergeName.setPersonID(result.getInt("PERSONID"));
     mergeName.setFinanceCode(result.getString("FINANCECODE"));
     mergeName.setCertType(result.getString("CERTTYPE").trim());
+    mergeName.setRealCertType(result.getString("REALCERTTYPE").trim());
     mergeName.setCertNo(result.getString("CERTNO"));
     mergeName.setCertNo_18(result.getString("CERTNO_18"));
     mergeName.setTime(result.getDate("GETTIME"));
     mergeName.setName(result.getString("NAME"));
     mergeName.setPinyin(NormalizeRule.getPY(result.getString("NAME")));
     mergeName.setSimilarity((long) -1);
+
     return NormalizeRule.doNormalize(mergeName);
   }
 
@@ -62,23 +64,24 @@ public class MergeWorkService extends Service<Integer> {
     pstmt.setInt(2, mergeName.getPersonID());
     pstmt.setString(3, mergeName.getFinanceCode());
     pstmt.setString(4, mergeName.getCertType().trim());
-    pstmt.setString(5, mergeName.getCertNo());
-    pstmt.setString(6, mergeName.getCertNo_18());
-    pstmt.setDate(7, new java.sql.Date(mergeName.getTime().getTime()));
-    pstmt.setString(8, mergeName.getName());
-    pstmt.setString(9, mergeName.getPinyin());
-    pstmt.setString(10, mergeName.getType().toString());
-    pstmt.setString(11, mergeName.getH_Name());
-    pstmt.setString(12, mergeName.getH_Pinyin());
-    pstmt.setString(13, mergeName.getHS_Name());
-    pstmt.setString(14, mergeName.getHS_Pinyin());
-    pstmt.setString(15, mergeName.getHSB_Name());
-    pstmt.setString(16, mergeName.getHSB_Pinyin());
-    pstmt.setString(17, mergeName.getHSBC_Name());
-    pstmt.setString(18, mergeName.getHSBC_Pinyin());
-    pstmt.setString(19, mergeName.getHSBCO_Name());
-    pstmt.setString(20, mergeName.getHSBCO_Pinyin());
-    pstmt.setLong(21, mergeName.getSimilarity());
+    pstmt.setString(5, mergeName.getRealCertType().trim());
+    pstmt.setString(6, mergeName.getCertNo());
+    pstmt.setString(7, mergeName.getCertNo_18());
+    pstmt.setDate(8, new java.sql.Date(mergeName.getTime().getTime()));
+    pstmt.setString(9, mergeName.getName());
+    pstmt.setString(10, mergeName.getPinyin());
+    pstmt.setString(11, mergeName.getType().toString());
+    pstmt.setString(12, mergeName.getH_Name());
+    pstmt.setString(13, mergeName.getH_Pinyin());
+    pstmt.setString(14, mergeName.getHS_Name());
+    pstmt.setString(15, mergeName.getHS_Pinyin());
+    pstmt.setString(16, mergeName.getHSB_Name());
+    pstmt.setString(17, mergeName.getHSB_Pinyin());
+    pstmt.setString(18, mergeName.getHSBC_Name());
+    pstmt.setString(19, mergeName.getHSBC_Pinyin());
+    pstmt.setString(20, mergeName.getHSBCO_Name());
+    pstmt.setString(21, mergeName.getHSBCO_Pinyin());
+    pstmt.setLong(22, mergeName.getSimilarity());
     try {
       pstmt.addBatch();
     } catch (SQLIntegrityConstraintViolationException cve) {
@@ -151,7 +154,7 @@ public class MergeWorkService extends Service<Integer> {
           statement = conn.createStatement();
 
           pstmt = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.MERGE_TABLE_NAME +
-            "_merge values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            "_merge values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
           result = statement.executeQuery(sql);
           conn.setAutoCommit(false);
@@ -160,34 +163,17 @@ public class MergeWorkService extends Service<Integer> {
           while (result.next()) {
             updateProgress(++progress, recordCount * 3);
             MergeName merged = getMergeNameFromDBResult(result);
-            //身份证
-            if (merged.getCertType().compareToIgnoreCase(EnumCertType.SFZ.getCode()) == 0 ||
-              merged.getCertType().compareToIgnoreCase(EnumCertType.LSSFZ.getCode()) == 0) {
-              if (personList.size() > 0 &&
-                merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
-                personList.get(personList.size() - 1).getCertNames().add(merged);
-              } else {
-                MergePerson newPersn = new MergePerson();
-                newPersn.setCertNo(merged.getCertNo_18());
-                newPersn.setCertType(merged.getCertType());
-                newPersn.setCertNames(new ArrayList<MergeName>());
-                newPersn.getCertNames().add(merged);
-                personList.add(newPersn);
-              }
-            }
-            //其他类型
-            else {
-              if (personList.size() > 0 &&
-                merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
-                personList.get(personList.size() - 1).getCertNames().add(merged);
-              } else {
-                MergePerson newPersn = new MergePerson();
-                newPersn.setCertNo(merged.getCertNo());
-                newPersn.setCertType(merged.getCertType());
-                newPersn.setCertNames(new ArrayList<MergeName>());
-                newPersn.getCertNames().add(merged);
-                personList.add(newPersn);
-              }
+
+            if (personList.size() > 0 &&
+              merged.getCertNo_18().compareToIgnoreCase(personList.get(personList.size() - 1).getCertNo()) == 0) {
+              personList.get(personList.size() - 1).getCertNames().add(merged);
+            } else {
+              MergePerson newPersn = new MergePerson();
+              newPersn.setCertNo(merged.getCertNo_18());
+              newPersn.setCertType(merged.getRealCertType());
+              newPersn.setCertNames(new ArrayList<MergeName>());
+              newPersn.getCertNames().add(merged);
+              personList.add(newPersn);
             }
           }
 
@@ -209,7 +195,13 @@ public class MergeWorkService extends Service<Integer> {
           for (int i = 0; i < size; i++) {
             updateProgress(++progress, total);
             MergePerson mergePerson = personList.get(i);
-            MergeRule.doMerge(mergePerson);
+            try {
+              MergeRule.doMerge(mergePerson);
+            } catch (Exception ex) {
+              logger.warning(ex.getMessage());
+              ex.printStackTrace();
+              continue;
+            }
           }
 
           logger.fine("线程" + getPartName() + "开始写回");
@@ -226,7 +218,7 @@ public class MergeWorkService extends Service<Integer> {
               conn.commit();
               conn.setAutoCommit(false);// 开始事务
               pstmt = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.MERGE_TABLE_NAME +
-                "_merge values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "_merge values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             }
           }
           conn.commit();

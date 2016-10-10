@@ -14,6 +14,7 @@ public class MergeName implements Comparable<MergeName> {
   Integer personID;
   String financeCode;
   String certType;
+  String realCertType;
   String certNo;
   String certNo_18;
   Date time;
@@ -79,6 +80,7 @@ public class MergeName implements Comparable<MergeName> {
       "personID:" + personID + "|" +
       "financeCode:" + financeCode + "|" +
       "certType:" + certType + "|" +
+      "realCertType:" + realCertType + "|" +
       "certNo:" + certNo + "|" +
       "certNo_18:" + certNo_18 + "|" +
       "time:" + time + "|" +
@@ -128,6 +130,14 @@ public class MergeName implements Comparable<MergeName> {
 
   public void setCertType(String certType) {
     this.certType = certType;
+  }
+
+  public String getRealCertType() {
+    return realCertType;
+  }
+
+  public void setRealCertType(String realCertType) {
+    this.realCertType = realCertType;
   }
 
   public String getCertNo() {

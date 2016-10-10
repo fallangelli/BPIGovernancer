@@ -96,7 +96,7 @@ public class CheckOtherNoRule {
 
   //长度大于2
   private boolean checkSize(CheckNoItem item) {
-    if (item.getCertNo().length() >= item.getRealCertType().getMinLenth())
+    if (item.getCertNo().length() > item.getRealCertType().getMinLenth())
       return true;
     else
       return false;

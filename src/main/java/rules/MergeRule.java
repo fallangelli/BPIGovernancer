@@ -56,7 +56,7 @@ public class MergeRule {
       case HSBCO:
       case OTHER:
       default:
-        retName = toMerge.getHSBCO_Name();
+        retName = toMerge.getHSBCO_Name() == null ? "" : toMerge.getHSBCO_Name();
         break;
     }
     return retName;
@@ -79,17 +79,16 @@ public class MergeRule {
         retPinyin = toMerge.getHSBC_Pinyin().toLowerCase();
         break;
       case HSBCO:
-        retPinyin = toMerge.getHSBCO_Pinyin().toLowerCase();
-        break;
       case OTHER:
       default:
-        retPinyin = toMerge.getHSBCO_Pinyin().toLowerCase();
+        retPinyin = toMerge.getHSBCO_Pinyin() == null ? "" : toMerge.getHSBCO_Pinyin().toLowerCase();
         break;
     }
     return retPinyin.toLowerCase();
   }
 
   public static void doMerge(MergePerson mergePerson) {
+
     List<MergeName> nameList = mergePerson.getCertNames();
     if (nameList == null)
       return;

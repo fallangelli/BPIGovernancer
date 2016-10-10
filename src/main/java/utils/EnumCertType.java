@@ -8,19 +8,19 @@ public enum EnumCertType {
 
   ALL("ALL", 99),
   SFZ("0", 99),
-  HKB("1", 99),
+  HKB("1", 2),
   HZ("2", 4),
-  JUNGZ("3", 3),
-  SBZ("4", 3),
+  JUNGZ("3", 4),
+  SBZ("4", 4),
   GAJMTXZ("5", 4),
   TWTBTXZ("6", 4),
   LSSFZ("7", 99),
   WGRJLZ("8", 4),
-  JINGGZ("9", 3),
+  JINGGZ("9", 4),
   XGSFZ("A", 4),
   AMSFZ("B", 4),
   TWSFZ("C", 4),
-  QT("X", 3);
+  QT("X", 2);
 
   private String code;
 

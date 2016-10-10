@@ -161,8 +161,6 @@ public class CheckCertNoRule {
         else
           return false;
       } catch (Exception e) {
-        logger.warning("计算校验位错误:" + id);
-        logger.severe(e.getMessage());
         return false;
       }
     } else

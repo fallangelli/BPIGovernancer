@@ -118,7 +118,7 @@ public class CheckCertNoService extends Service<Integer> {
                 pstmtInvalid.setInt(2, item.getPersonId());
                 pstmtInvalid.setString(3, item.getFinanceCode());
                 pstmtInvalid.setString(4, item.getName());
-                pstmtInvalid.setString(5, item.getCertType().getCode());
+                pstmtInvalid.setString(5, item.getCertType().getCode().trim());
                 pstmtInvalid.setString(6, item.getCertNo());
                 pstmtInvalid.setDate(7, new java.sql.Date(item.getGetTime().getTime()));
                 String msg = "";
@@ -200,9 +200,9 @@ public class CheckCertNoService extends Service<Integer> {
               conn.setAutoCommit(false);// 开始事务
               pstmtRemoveInvalid = conn.prepareStatement("delete from " + JdbcUtils.CHECK_CERTNO_TABLE_NAME + " where pin=?");
               pstmtValid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
-                "_valid values (?,?,?,?,?,?,?,?)");
+                "_valid values (?,?,?,?,?,?,?,?,?)");
               pstmtInvalid = conn.prepareStatement("INSERT INTO /*+ APPEND*/ " + JdbcUtils.CHECK_CERTNO_TABLE_NAME +
-                "_invalid values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "_invalid values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             }
           }
           conn.commit();
