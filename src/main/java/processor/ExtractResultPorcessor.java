@@ -38,11 +38,11 @@ public class ExtractResultPorcessor {
       stmt.close();
 
     } catch (SQLException e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } catch (Exception e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } finally {
@@ -77,11 +77,11 @@ public class ExtractResultPorcessor {
       stmt.close();
 
     } catch (SQLException e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } catch (Exception e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } finally {
@@ -119,11 +119,11 @@ public class ExtractResultPorcessor {
       stmt.executeUpdate();
       stmt.close();
     } catch (SQLException e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } catch (Exception e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } finally {
@@ -166,11 +166,11 @@ public class ExtractResultPorcessor {
       stmt.executeUpdate();
       stmt.close();
     } catch (SQLException e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } catch (Exception e) {
-      logger.warning("create table " + JdbcUtils.CHECK_CERTNO_TABLE_NAME);
+      logger.warning("create table " + JdbcUtils.EXTRACT_RESULT_TABLE_NAME);
       logger.warning(e.getMessage());
       return false;
     } finally {
