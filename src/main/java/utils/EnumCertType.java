@@ -8,7 +8,7 @@ public enum EnumCertType {
 
   ALL("ALL", 99),
   SFZ("0", 99),
-  HKB("1", 2),
+  HKB("1", 4),
   HZ("2", 4),
   JUNGZ("3", 4),
   SBZ("4", 4),
@@ -20,7 +20,7 @@ public enum EnumCertType {
   XGSFZ("A", 4),
   AMSFZ("B", 4),
   TWSFZ("C", 4),
-  QT("X", 2);
+  QT("X", 4);
 
   private String code;
 
